@@ -107,12 +107,12 @@ void processVideo(std::string videoFilename)
 
     // read input data & process
     // press'q' for quitting
-    int width_lane = 50;
+    int width_lane = 100;
     int width_DVL  = 100;
-    int T_HDist = 100, T_VDist = 100;
+    int T_HDist = 50, T_VDist = 100;
     int total_num = 0, add_num = 0;
     std::vector<int> peak_idx_current, peak_idx_last;
-    while( (char)cv::waitKey(1000) != 'q')
+    while( (char)cv::waitKey(30) != 'q')
     {
       if(!capture.read(frame))
       {
@@ -137,23 +137,22 @@ void processVideo(std::string videoFilename)
       cv::Mat tmp_2_conv;
       dual_conv(detect_zone, width_lane, width_DVL, tmp_1_conv, tmp_2_conv);
       // step 4: vehicle counting
-      int num = 0, space = 2, min = 10000;
+      int num = 0, space = 10, min = 10000;
       for (int i=0; i<tmp_1_conv.size(); i++)
       {
         if (i < space || i > tmp_1_conv.size()-space)
           continue;
         if (tmp_1_conv[i]>tmp_1_conv[i-space] && tmp_1_conv[i]>tmp_1_conv[i+space])
-          if (peak_idx_current.empty() || (i-peak_idx_current[num-1])>T_HDist)
-          {
-            peak_idx_current.push_back(i);
-            num ++;
-          }
+        {
+            if (peak_idx_current.empty() || abs(i-peak_idx_current[num-1])>T_HDist)
+            {
+              peak_idx_current.push_back(i);
+              num ++;
+            }
+        }
       }
       if (peak_idx_last.empty())
-      {
         add_num = peak_idx_current.size();
-        total_num += add_num;
-      }
       else
       {
         for (int i=0; i<peak_idx_current.size(); i++)
@@ -165,9 +164,10 @@ void processVideo(std::string videoFilename)
           }
           if (min > T_VDist)
             add_num ++;
+          min = 10000;
         }
-        total_num += add_num;
       }
+      total_num += add_num;
       // find contours
       cv::findContours(objects,contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
       std::vector<std::vector<cv::Point> > hull(contours.size());
