@@ -10,4 +10,4 @@ make
 ## Summary report
 
 ## Result
-<iframe width="560" height="315" src="https://www.youtube.com/embed/U-5w5K4zTFA" frameborder="0" allowfullscreen></iframe>
+![](https://github.com/SaoYan/VehicleCounting/blob/master/Result_Vehicle-Counting.gif)
