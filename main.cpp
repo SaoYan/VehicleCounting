@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cmath>
 
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
@@ -108,87 +109,113 @@ void processVideo(std::string videoFilename)
     // press'q' for quitting
     int width_lane = 50;
     int width_DVL  = 100;
-    int T_HDist = 100;
-    while( (char)cv::waitKey(30) != 'q')
+    int T_HDist = 100, T_VDist = 100;
+    int total_num = 0, add_num = 0;
+    std::vector<int> peak_idx_current, peak_idx_last;
+    while( (char)cv::waitKey(1000) != 'q')
     {
-        if(!capture.read(frame))
-        {
-            std::cerr << "Unable to read next frame." << std::endl;
-            std::cerr << "Exiting..." << std::endl;
-            //exit(EXIT_FAILURE);
-            break;
-        }
-        // step 1: background subtraction
-        pMOG->apply(frame, fgMaskMOG);
-        // step 2: vehicle detection (morphology operation)
-        cv::Mat objects = fgMaskMOG.clone();
-        std::vector< std::vector<cv::Point> > contours;
-        cv::Mat cross_element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(5,5));
-        cv::Mat disk_element   = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5));
-        cv::dilate(objects, objects, cross_element);
-        cv::dilate(objects, objects, disk_element);
-        // step 3: vehicle location (dual template)
-        cv::Rect r = cv::Rect(0, height-24-width_DVL, frame.cols, width_DVL);
-        cv::Mat detect_zone = objects(r).clone();
-        std::vector<double> tmp_1_conv;
-        cv::Mat tmp_2_conv;
-        dual_conv(detect_zone, width_lane, width_DVL, tmp_1_conv, tmp_2_conv);
-        // step 4: vehicle counting
-        std::vector<int> peak_idx_current, peak_idx_last;
-        int num = 0;
-        int space = 2;
-        for (int i=0; i<tmp_1_conv.size(); i++)
-        {
-          if (i < space || i > tmp_1_conv.size()-space)
-            continue;
-          if (tmp_1_conv[i]>tmp_1_conv[i-space] && tmp_1_conv[i]>tmp_1_conv[i+space])
-            if (peak_idx_current.empty() || (i-peak_idx_current[num-1])>T_HDist)
-            {
-              peak_idx_current.push_back(i);
-              num ++;
-            }
-        }
-
-
-
-        // find contours
-        cv::findContours(objects,contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-        std::vector<std::vector<cv::Point> > hull(contours.size());
-        for(int i=0; i<contours.size(); i++)
-            cv::convexHull(cv::Mat(contours[i]), hull[i]);
-        // draw double virtual lines
-        cv::line(objects, cv::Point(0, height-24),
-            cv::Point(width-1, height-24), cv::Scalar(255,255,255), 2);
-        cv::line(objects, cv::Point(0, height-24-width_DVL),
-            cv::Point(width-1, height-24-width_DVL), cv::Scalar(255,255,255), 2);
-        // draw contours + hull results
-        cv::Mat drawing = cv::Mat::zeros(objects.size(), CV_8UC3 );
-        cv::drawContours(drawing, contours, -1, cv::Scalar(255,255,255));
-        cv::drawContours(drawing, hull, -1, cv::Scalar(0,255,0));
-        // draw vehicle location hist
-        cv::Mat histDisp;
-        dispHist(tmp_1_conv, tmp_1_conv.size(), histDisp);
+      if(!capture.read(frame))
+      {
+          std::cerr << "Unable to read next frame." << std::endl;
+          std::cerr << "Exiting..." << std::endl;
+          //exit(EXIT_FAILURE);
+          break;
+      }
+      // step 1: background subtraction
+      pMOG->apply(frame, fgMaskMOG);
+      // step 2: vehicle detection (morphology operation)
+      cv::Mat objects = fgMaskMOG.clone();
+      std::vector< std::vector<cv::Point> > contours;
+      cv::Mat cross_element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(5,5));
+      cv::Mat disk_element   = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5));
+      cv::dilate(objects, objects, cross_element);
+      cv::dilate(objects, objects, disk_element);
+      // step 3: vehicle location (dual template)
+      cv::Rect r = cv::Rect(0, height-24-width_DVL, frame.cols, width_DVL);
+      cv::Mat detect_zone = objects(r).clone();
+      std::vector<double> tmp_1_conv;
+      cv::Mat tmp_2_conv;
+      dual_conv(detect_zone, width_lane, width_DVL, tmp_1_conv, tmp_2_conv);
+      // step 4: vehicle counting
+      int num = 0, space = 2, min = 10000;
+      for (int i=0; i<tmp_1_conv.size(); i++)
+      {
+        if (i < space || i > tmp_1_conv.size()-space)
+          continue;
+        if (tmp_1_conv[i]>tmp_1_conv[i-space] && tmp_1_conv[i]>tmp_1_conv[i+space])
+          if (peak_idx_current.empty() || (i-peak_idx_current[num-1])>T_HDist)
+          {
+            peak_idx_current.push_back(i);
+            num ++;
+          }
+      }
+      if (peak_idx_last.empty())
+      {
+        add_num = peak_idx_current.size();
+        total_num += add_num;
+      }
+      else
+      {
         for (int i=0; i<peak_idx_current.size(); i++)
         {
-          cv::line(histDisp,
-            cv::Point(peak_idx_current[i], 0), cv::Point(peak_idx_current[i], histDisp.rows-1),
-            cv::Scalar(0), 2);
+          for (int j=0; j<peak_idx_last.size(); j++)
+          {
+            if (abs(peak_idx_current[i]-peak_idx_last[j]) < min)
+              min = abs(peak_idx_current[i]-peak_idx_last[j]);
+          }
+          if (min > T_VDist)
+            add_num ++;
         }
-        std::cout << peak_idx_current.size() << std::endl;
-        // get the frame number and write it on the current frame
-        std::stringstream ss;
-        cv::rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
-                  cv::Scalar(255,255,255), -1);
-        ss << capture.get(cv::CAP_PROP_POS_FRAMES);
-        std::string frameNumberString = ss.str();
-        cv::putText(frame, frameNumberString, cv::Point(15, 15),
-                cv::FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-        //show the current frame and the fg masks
-        cv::imshow("Frame", frame);
-        cv::imshow("Vehicle Detection", objects);
-        cv::imshow("Contours", drawing);
-        cv::imshow("Vehicle Location", histDisp);
-        //cv::imshow("Holes", tmp_2_conv);
+        total_num += add_num;
+      }
+      // find contours
+      cv::findContours(objects,contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+      std::vector<std::vector<cv::Point> > hull(contours.size());
+      for(int i=0; i<contours.size(); i++)
+          cv::convexHull(cv::Mat(contours[i]), hull[i]);
+      // draw double virtual lines
+      cv::line(objects, cv::Point(0, height-24),
+          cv::Point(width-1, height-24), cv::Scalar(255,255,255), 2);
+      cv::line(objects, cv::Point(0, height-24-width_DVL),
+          cv::Point(width-1, height-24-width_DVL), cv::Scalar(255,255,255), 2);
+      // draw contours + hull results
+      cv::Mat drawing = cv::Mat::zeros(objects.size(), CV_8UC3 );
+      cv::drawContours(drawing, contours, -1, cv::Scalar(255,255,255));
+      cv::drawContours(drawing, hull, -1, cv::Scalar(0,255,0));
+      // draw vehicle location hist
+      cv::Mat histDisp;
+      dispHist(tmp_1_conv, tmp_1_conv.size(), histDisp);
+      for (int i=0; i<peak_idx_current.size(); i++)
+      {
+        cv::line(histDisp,
+          cv::Point(peak_idx_current[i], 0), cv::Point(peak_idx_current[i], histDisp.rows-1),
+          cv::Scalar(0), 2);
+      }
+      // write the frame number & counting result on the current frame
+      std::stringstream ss;
+      ss << capture.get(cv::CAP_PROP_POS_FRAMES);
+      cv::rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
+                cv::Scalar(255,255,255), -1);
+      cv::putText(frame, ss.str(), cv::Point(15, 15),
+              cv::FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+      ss.str(""); ss << add_num;
+      std::string counting = "+" + ss.str() + "   ";
+      ss.str(""); ss << total_num;
+      counting += ss.str();
+      cv::rectangle(frame, cv::Point(10, 22), cv::Point(100,40),
+                cv::Scalar(255,255,255), -1);
+      cv::putText(frame, counting, cv::Point(15, 35),
+              cv::FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+      //show the current frame and the fg masks
+      cv::imshow("Frame", frame);
+      cv::imshow("Vehicle Detection", objects);
+      cv::imshow("Contours", drawing);
+      cv::imshow("Vehicle Location", histDisp);
+      //cv::imshow("Holes", tmp_2_conv);
+      // re-initialization
+      add_num = 0;
+      peak_idx_last = peak_idx_current;
+      peak_idx_current.clear();
     }
     //delete capture object
     capture.release();
