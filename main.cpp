@@ -127,7 +127,7 @@ void processVideo(std::string videoFilename)
       vehicle_location(detect_zone, width_lane, width_DVL, tmp_conv);
       // step 4: vehicle counting
       int num = 0, space = 20, min = 10000;
-      // detection all the peak candidates
+      // detect all the peak candidates
       for (int i=0; i<tmp_conv.size(); i++)
       {
         if (i < space)
@@ -205,7 +205,7 @@ void processVideo(std::string videoFilename)
       cv::rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
                 cv::Scalar(255,255,255), -1);
       cv::putText(frame, ss.str(), cv::Point(15, 15),
-              cv::FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+              cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,0,0));
       //  write counting results on the current frame
       ss.str(""); ss << add_num;
       std::string counting = "+" + ss.str() + "   ";
@@ -214,7 +214,7 @@ void processVideo(std::string videoFilename)
       cv::rectangle(frame, cv::Point(10, 22), cv::Point(100,40),
                 cv::Scalar(255,255,255), -1);
       cv::putText(frame, counting, cv::Point(15, 35),
-              cv::FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+              cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0,0,0));
       // show
       cv::imshow("Frame", frame);
       cv::imshow("Vehicle Detection", objects);
@@ -234,7 +234,6 @@ void vehicle_location(cv::Mat detect_zone, int W, int L, std::vector<double> & t
     /***********************************************************************
     W: width of each lane
     L: width of the DVL
-    n: # of lanes
     ***********************************************************************/
     tmp_conv.clear();
     cv::Mat tmp_1 = cv::Mat::ones(L, W, CV_32F);
