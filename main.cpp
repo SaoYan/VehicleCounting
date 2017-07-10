@@ -90,8 +90,8 @@ void processVideo(std::string videoFilename)
     }
     else
     {
-        height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
-        width  = capture.get(cv::CAP_PROP_FRAME_WIDTH);
+        height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+        width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     }
 
     // read input data & process
