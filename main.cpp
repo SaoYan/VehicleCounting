@@ -28,23 +28,23 @@ void help()
     << "./DVL -vid { <video filename> | 0 }"                                        << std::endl
     << "for example:"                                                               << std::endl
     << "to use video file: ./DVL -vid test.mp4"                                     << std::endl
-    << "to use camera: ./DVL -vid 0"                                                << std::endl                            << std::endl
+    << "to use camera: ./DVL -vid 0"                                                << std::endl
     << "--------------------------------------------------------------------------" << std::endl
     << std::endl;
 }
 
 int main(int argc, char* argv[])
 {
-    //print help information
+    // print help information
     help();
-    //check for the input parameter correctness
+    // check for the input parameter correctness
     if(argc != 3)
     {
         std::cerr <<"Incorret input list" << std::endl;
         std::cerr <<"exiting..." << std::endl;
         return EXIT_FAILURE;
     }
-    //create GUI windows
+    // create GUI windows
     cv::namedWindow("Frame");
     cv::namedWindow("Vehicle Detection");
     cv::namedWindow("Contours");
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    //destroy GUI windows
+    // destroy GUI windows
     cv::destroyAllWindows();
     return EXIT_SUCCESS;
 }
