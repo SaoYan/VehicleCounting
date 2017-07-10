@@ -23,13 +23,13 @@ void dispHist(std::vector<double> hist, int histSize, cv::Mat & histDisp);
 void help()
 {
     std::cout
-    << "--------------------------------------------------------------------------" << std::endl
-    << "Usage:"                                                                     << std::endl
-    << "./DVL -vid { <video filename> | 0 }"                                        << std::endl
-    << "for example:"                                                               << std::endl
-    << "to use video file: ./DVL -vid test.mp4"                                     << std::endl
-    << "to use camera: ./DVL -vid 0"                                                << std::endl
-    << "--------------------------------------------------------------------------" << std::endl
+    << "------------------------------------------------" << std::endl
+    << "Usage:"                                           << std::endl
+    << "./DVL -vid { <video filename> | 0 }"              << std::endl
+    << "for example:"                                     << std::endl
+    << "to use video file: ./DVL -vid test.mp4"           << std::endl
+    << "to use camera: ./DVL -vid 0"                      << std::endl
+    << "------------------------------------------------" << std::endl
     << std::endl;
 }
 
