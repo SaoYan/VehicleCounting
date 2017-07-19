@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 import cv2
 import sys
 import copy
@@ -40,7 +38,6 @@ def dispHist(hist, histSize):
             binVal = hist[h]
             intensity = int(binVal*hpt/maxVal)
             cv2.line(histDisp, (h,histSize), (h,histSize-intensity), (255))
-
     return histDisp
 
 def processVideo(videoFilename):
@@ -180,7 +177,6 @@ def main():
         return
     # destroy GUI windows
     cv2.destroyAllWindows();
-
 
 if __name__ == "__main__":
     main()
