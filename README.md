@@ -13,7 +13,7 @@ make
 ```
 git clone https://github.com/SaoYan/VehicleCounting
 cd VehicleCounting
-python VehicleCounting.py
+python VehicleCounting.py -vid test.mp4
 ```
 ## Summary report
 I‘ve written a summary report, in which I summarize the author's method, analyze the test result and propose some fundamental ideas on how to improve the author's work using deep learning method. You can get the report from [this web page](https://saoyan.github.io/vehicle-counting-DVL/).
