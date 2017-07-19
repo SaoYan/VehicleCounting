@@ -1,11 +1,19 @@
 # VehicleCounting
-This is my implementation of the paper [Vehicle counting based on double virtual lines](https://link.springer.com/article/10.1007/s11760-016-1038-7)<br />  
+This is my implementation of the paper [Vehicle counting based on double virtual lines](https://link.springer.com/article/10.1007/s11760-016-1038-7)  
+Both C++ and Python implementation are provided.
 ## How to run the code
+**run C++ code**
 ```
 git clone https://github.com/SaoYan/VehicleCounting
 cd VehicleCounting
 make
 ./DVL -vid test.mp4
+```
+**run Python code**
+```
+git clone https://github.com/SaoYan/VehicleCounting
+cd VehicleCounting
+python VehicleCounting.py
 ```
 ## Summary report
 I‘ve written a summary report, in which I summarize the author's method, analyze the test result and propose some fundamental ideas on how to improve the author's work using deep learning method. You can get the report from [this web page](https://saoyan.github.io/vehicle-counting-DVL/).
