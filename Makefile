@@ -6,7 +6,7 @@ all: DVL
 DVL: main.o
 	g++ -o DVL main.o $(LIBS) -lpython2.7
 
-main.o: main.cpp matplotlibcpp.h
+main.o: main.cpp
 	g++ -c main.cpp $(INCLUDE) -I/usr/include/python2.7
 
 clean:
