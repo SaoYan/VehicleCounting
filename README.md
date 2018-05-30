@@ -1,6 +1,7 @@
-[![DOI](https://zenodo.org/badge/96367744.svg)](https://zenodo.org/badge/latestdoi/96367744)
-
 # VehicleCounting
+[![DOI](https://zenodo.org/badge/96367744.svg)](https://zenodo.org/badge/latestdoi/96367744)
+[![AUR](https://img.shields.io/aur/license/yaourt.svg?style=plastic)](LICENSE)
+
 This is my implementation of the paper [Vehicle counting based on double virtual lines](https://link.springer.com/article/10.1007/s11760-016-1038-7)  
 Both C++ and Python implementation are provided.
 ## How to run the code
